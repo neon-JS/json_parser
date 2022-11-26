@@ -1,6 +1,5 @@
-use crate::parser::Parser;
-use crate::property::{Property, ToProperty};
-use crate::value_containers::container_null::ContainerNull;
+use crate::definitions::parser::Parser;
+use crate::definitions::property::{Property, ToProperty};
 
 pub struct ContainerNumber {
     pub value: f64

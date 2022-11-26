@@ -1,4 +1,4 @@
-use crate::property::Property;
+use crate::definitions::property::Property;
 
 pub trait Parser {
     // TODO: Use Chars or some other structure to prevent converting in each parser

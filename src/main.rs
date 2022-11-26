@@ -1,17 +1,20 @@
+use crate::definitions::parser::Parser;
 use crate::value_containers::container_bool::ContainerBool;
 use crate::value_containers::container_null::ContainerNull;
 use crate::value_containers::container_string::ContainerString;
 use crate::value_containers::container_number::ContainerNumber;
-use crate::parser::Parser;
 
 mod value_containers {
+    pub mod container_array;
     pub mod container_bool;
     pub mod container_null;
     pub mod container_string;
     pub mod container_number;
 }
-mod property;
-mod parser;
+mod definitions {
+    pub mod property;
+    pub mod parser;
+}
 
 fn main() {
     let mut cs = ContainerString { value: String::new() };
