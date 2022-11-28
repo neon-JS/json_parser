@@ -1,4 +1,6 @@
 use std::fmt;
+use crate::errors::json_stream_error::JsonStreamError;
+use crate::errors::json_stream_error::JsonStreamError::OutOfRange;
 
 const WHITESPACE: char = ' ';
 
@@ -60,9 +62,9 @@ impl JsonStream<'_> {
         }
     }
 
-    pub fn consume(&mut self, count: usize) -> Result<(), String> { // TODO: Use real error
+    pub fn consume(&mut self, count: usize) -> Result<(), JsonStreamError> {
         if (self.pointer + count) > self.size {
-            return Err(String::from("Cannot consume more items than existing"));
+            return Err(OutOfRange);
         }
 
         self.pointer += count;

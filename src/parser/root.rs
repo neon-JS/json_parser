@@ -1,4 +1,6 @@
-use crate::definitions::parser::Parser;
+use crate::traits::parser::Parser;
+use crate::errors::json_parser_error::JsonParserError;
+use crate::errors::json_parser_error::JsonParserError::{UnexpectedEndOfData, UnknownToken};
 use crate::structures::json_stream::JsonStream;
 use crate::structures::property::Property;
 use crate::parser::array::{ParserArray, ARRAY_OPENING_BRACKET};
@@ -11,7 +13,7 @@ use crate::parser::string::{ParserString, DOUBLE_QUOTES};
 pub struct ParserRoot {}
 
 impl Parser for ParserRoot {
-    fn parse(stream: &mut JsonStream) -> Result<Property, String> {
+    fn parse(stream: &mut JsonStream) -> Result<Property, JsonParserError> {
         stream.skip_whitespaces();
 
         return match stream.peek() {
@@ -32,7 +34,8 @@ impl Parser for ParserRoot {
             | Some('9') => ParserNumber::parse(stream),
             Some(OBJECT_OPENING_BRACKET) => ParserObject::parse(stream),
             Some(DOUBLE_QUOTES) => ParserString::parse(stream),
-            _ => Err(String::from("Could not parse: Unknown token."))
+            Some(token) => Err(UnknownToken(token)),
+            None => Err(UnexpectedEndOfData),
         };
     }
 }

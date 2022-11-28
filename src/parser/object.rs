@@ -1,5 +1,10 @@
 use std::collections::HashMap;
-use crate::definitions::parser::Parser;
+use crate::traits::parser::Parser;
+use crate::errors::json_parser_error::JsonParserError;
+use crate::errors::json_parser_error::JsonParserError::{
+    DuplicateKey, InvalidObjectKey, InvalidObjectKeyValueSeparatorToken, InvalidObjectOpeningToken,
+    UnexpectedEndOfData, InvalidObjectProperty,
+};
 use crate::structures::json_stream::JsonStream;
 use crate::structures::property::Property;
 use crate::parser::root::ParserRoot;
@@ -13,13 +18,13 @@ const KEY_VALUE_SEPARATOR: char = ':';
 pub struct ParserObject {}
 
 impl Parser for ParserObject {
-    fn parse(stream: &mut JsonStream) -> Result<Property, String> {
+    fn parse(stream: &mut JsonStream) -> Result<Property, JsonParserError> {
         stream.skip_whitespaces();
 
         match stream.peek() {
             Some(OBJECT_OPENING_BRACKET) => (),
-            None => return Err(String::from("Could not parse object: Too short.")),
-            _ => return Err(String::from("Could not parse object: Missing opening braces."))
+            Some(token) => return Err(InvalidObjectOpeningToken(token)),
+            None => return Err(UnexpectedEndOfData),
         }
 
         stream.consume(1).unwrap();
@@ -33,38 +38,40 @@ impl Parser for ParserObject {
                 Some(OBJECT_CLOSING_BRACKET) => {
                     stream.consume(1).unwrap();
                     return Ok(Property {
-                        numeric_value: None,
-                        string_value: None,
-                        array_value: None,
-                        object_value: Some(properties),
-                        bool_value: None,
-                        is_null_value: false,
+                        number: None,
+                        string: None,
+                        array: None,
+                        object: Some(properties),
+                        bool: None,
+                        is_null: false,
                     });
                 }
                 Some(PROPERTY_SEPARATOR) => {
                     stream.consume(1).unwrap();
                 }
-                None => return Err(String::from("Could not parse object: Missing closing braces.")),
+                None => return Err(UnexpectedEndOfData),
                 _ => ()
             }
 
             let key = match ParserString::parse(stream) {
-                Ok(property) => property.string_value.unwrap(),
-                Err(_) => return Err(String::from("Could not parse object: Invalid key")),
+                Ok(property) => property.string.unwrap(),
+                Err(inner) => return Err(InvalidObjectKey(Box::new(inner))),
             };
 
             stream.skip_whitespaces();
-            if stream.next() != Some(KEY_VALUE_SEPARATOR) {
-                return Err(String::from("Could not parse object: Missing separator."));
+            match stream.next() {
+                Some(KEY_VALUE_SEPARATOR) => (),
+                Some(token) => return Err(InvalidObjectKeyValueSeparatorToken(token)),
+                None => return Err(UnexpectedEndOfData),
             }
 
             let property = match ParserRoot::parse(stream) {
                 Ok(p) => p,
-                Err(e) => return Err(String::from(format!("Could not parse object as property could not be parsed: {}", e))),
+                Err(inner) => return Err(InvalidObjectProperty(Box::new(inner))),
             };
 
             if properties.contains_key(key.as_str()) {
-                return Err(String::from("Could not parse object: Duplicate key"));
+                return Err(DuplicateKey(key));
             }
 
             properties.insert(key, Box::new(property));

@@ -1,4 +1,4 @@
-use crate::definitions::parser::Parser;
+use crate::traits::parser::Parser;
 use crate::parser::root::ParserRoot;
 use crate::structures::json_stream::JsonStream;
 
@@ -12,13 +12,18 @@ mod parser {
     pub mod root;
 }
 
-mod definitions {
+mod traits {
     pub mod parser;
 }
 
 mod structures {
     pub mod json_stream;
     pub mod property;
+}
+
+mod errors {
+    pub mod json_parser_error;
+    pub mod json_stream_error;
 }
 
 fn main() {

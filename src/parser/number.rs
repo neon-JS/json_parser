@@ -1,4 +1,6 @@
-use crate::definitions::parser::Parser;
+use crate::traits::parser::Parser;
+use crate::errors::json_parser_error::JsonParserError;
+use crate::errors::json_parser_error::JsonParserError::{InvalidNumberFormat, InvalidNumberToken, MultipleNumberDecimalPoints, MultipleNumberExponentSigns, UnexpectedEndOfData};
 use crate::structures::json_stream::JsonStream;
 use crate::structures::property::Property;
 
@@ -10,7 +12,7 @@ const UPPER_EXPONENT_SIGN: char = 'E';
 pub struct ParserNumber {}
 
 impl Parser for ParserNumber {
-    fn parse(stream: &mut JsonStream) -> Result<Property, String> {
+    fn parse(stream: &mut JsonStream) -> Result<Property, JsonParserError> {
         stream.skip_whitespaces();
 
         match stream.peek() {
@@ -26,8 +28,8 @@ impl Parser for ParserNumber {
             | Some('8')
             | Some('9')
             => (),
-            None => return Err(String::from("Could not parse number: Too short.")),
-            _ => return Err(String::from("Could not parse number: Missing token."))
+            Some(token) => return Err(InvalidNumberToken(token)),
+            None => return Err(UnexpectedEndOfData),
         }
 
         let mut contains_decimal_point = false;
@@ -39,20 +41,19 @@ impl Parser for ParserNumber {
         while let Some(character) = stream.peek() {
             if character == DECIMAL_POINT {
                 if contains_decimal_point {
-                    return Err(String::from("Could not parse number: Contains multiple decimal points."));
+                    return Err(MultipleNumberDecimalPoints);
                 }
                 contains_decimal_point = true;
             }
 
             if character == LOWER_EXPONENT_SIGN || character == UPPER_EXPONENT_SIGN {
                 if contains_exponent {
-                    return Err(String::from("Could not parse number: Contains multiple exponents."));
+                    return Err(MultipleNumberExponentSigns);
                 }
                 contains_exponent = true;
             }
 
-            if
-                (character >= '0' && character <= '9')
+            if (character >= '0' && character <= '9')
                 || character == LOWER_EXPONENT_SIGN
                 || character == UPPER_EXPONENT_SIGN
                 || character == DECIMAL_POINT
@@ -65,22 +66,26 @@ impl Parser for ParserNumber {
             break;
         }
 
-        if [LOWER_EXPONENT_SIGN, UPPER_EXPONENT_SIGN, MINUS].contains(characters.last().unwrap()) {
-            return Err(String::from("Could not parse number: Missing values."));
-        }
+        match characters.last() {
+            Some(&LOWER_EXPONENT_SIGN)
+            | Some(&UPPER_EXPONENT_SIGN)
+            | Some(&MINUS)
+            => return Err(UnexpectedEndOfData),
+            _ => ()
+        };
 
-        let parsed_value = characters.into_iter().collect::<String>().parse::<f64>();
-        if parsed_value.is_err() {
-            return Err(String::from("Could not parse number: Invalid format"));
-        }
+        let number_as_string = characters.into_iter().collect::<String>();
 
-        return Ok(Property {
-            numeric_value: Some(parsed_value.unwrap()),
-            string_value: None,
-            array_value: None,
-            object_value: None,
-            bool_value: None,
-            is_null_value: false,
-        });
+        return match number_as_string.parse::<f64>() {
+            Ok(number) => Ok(Property {
+                number: Some(number),
+                string: None,
+                array: None,
+                object: None,
+                bool: None,
+                is_null: false,
+            }),
+            Err(_) => Err(InvalidNumberFormat(number_as_string))
+        };
     }
 }

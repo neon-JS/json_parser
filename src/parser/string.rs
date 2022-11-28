@@ -1,4 +1,6 @@
-use crate::definitions::parser::Parser;
+use crate::traits::parser::Parser;
+use crate::errors::json_parser_error::JsonParserError;
+use crate::errors::json_parser_error::JsonParserError::{InvalidStringOpeningToken, UnexpectedEndOfData};
 use crate::structures::json_stream::JsonStream;
 use crate::structures::property::Property;
 
@@ -9,13 +11,13 @@ pub struct ParserString {}
 
 // TODO: Special & escaped characters, line breaks etc.
 impl Parser for ParserString {
-    fn parse(stream: &mut JsonStream) -> Result<Property, String> {
+    fn parse(stream: &mut JsonStream) -> Result<Property, JsonParserError> {
         stream.skip_whitespaces();
 
         match stream.peek() {
             Some(DOUBLE_QUOTES) => (),
-            None => return Err(String::from("Could not parse string: Too short.")),
-            _ => return Err(String::from("Could not parse string: Missing opening quotes."))
+            Some(token) => return Err(InvalidStringOpeningToken(token)),
+            None => return Err(UnexpectedEndOfData),
         }
 
         stream.consume(1).unwrap();
@@ -26,12 +28,12 @@ impl Parser for ParserString {
         while let Some(character) = stream.next() {
             if character == DOUBLE_QUOTES && !char_is_escaped {
                 return Ok(Property {
-                    numeric_value: None,
-                    string_value: Some(String::from(&characters.into_iter().collect::<String>())),
-                    array_value: None,
-                    object_value: None,
-                    bool_value: None,
-                    is_null_value: false,
+                    number: None,
+                    string: Some(String::from(&characters.into_iter().collect::<String>())),
+                    array: None,
+                    object: None,
+                    bool: None,
+                    is_null: false,
                 });
             }
 
@@ -49,6 +51,6 @@ impl Parser for ParserString {
             }
         }
 
-        return Err(String::from("Could not parse string: Missing closing quotes."));
+        return Err(UnexpectedEndOfData);
     }
 }
