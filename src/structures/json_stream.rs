@@ -16,7 +16,7 @@ impl JsonStream<'_> {
             return None;
         }
 
-        return Some(self.stream[self.pointer] as char);
+        Some(self.stream[self.pointer] as char)
     }
 
     pub fn peek_equals(&self, compare: &str) -> bool
@@ -33,7 +33,7 @@ impl JsonStream<'_> {
             pointer += 1;
         }
 
-        return true;
+        true
     }
 
     pub fn next(&mut self) -> Option<char> {
@@ -44,7 +44,7 @@ impl JsonStream<'_> {
         let result = Some(self.stream[self.pointer] as char);
         self.pointer += 1;
 
-        return result;
+        result
     }
 
     pub fn skip_whitespaces(&mut self) {
@@ -69,7 +69,7 @@ impl JsonStream<'_> {
 
         self.pointer += count;
 
-        return Ok(());
+        Ok(())
     }
 
     pub fn create(json: &str) -> JsonStream {

@@ -34,9 +34,7 @@ impl Parser for ParserNumber {
 
         let mut contains_decimal_point = false;
         let mut contains_exponent = false;
-        let mut characters = Vec::new();
-
-        characters.push(stream.next().unwrap());
+        let mut characters = vec!(stream.next().unwrap());
 
         while let Some(character) = stream.peek() {
             if character == DECIMAL_POINT {
@@ -53,7 +51,7 @@ impl Parser for ParserNumber {
                 contains_exponent = true;
             }
 
-            if (character >= '0' && character <= '9')
+            if ('0'..='9').contains(&character)
                 || character == LOWER_EXPONENT_SIGN
                 || character == UPPER_EXPONENT_SIGN
                 || character == DECIMAL_POINT
@@ -76,7 +74,7 @@ impl Parser for ParserNumber {
 
         let number_as_string = characters.into_iter().collect::<String>();
 
-        return match number_as_string.parse::<f64>() {
+        match number_as_string.parse::<f64>() {
             Ok(number) => Ok(Property {
                 number: Some(number),
                 string: None,
@@ -86,6 +84,6 @@ impl Parser for ParserNumber {
                 is_null: false,
             }),
             Err(_) => Err(InvalidNumberFormat(number_as_string))
-        };
+        }
     }
 }

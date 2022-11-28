@@ -22,6 +22,6 @@ impl Parser for ParserNull {
             });
         }
 
-        return Err(InvalidNullToken);
+        Err(InvalidNullToken)
     }
 }

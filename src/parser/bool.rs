@@ -34,6 +34,6 @@ impl Parser for ParserBool {
             });
         }
 
-        return Err(InvalidBoolToken);
+        Err(InvalidBoolToken)
     }
 }

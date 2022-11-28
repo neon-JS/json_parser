@@ -51,6 +51,6 @@ impl Parser for ParserString {
             }
         }
 
-        return Err(UnexpectedEndOfData);
+        Err(UnexpectedEndOfData)
     }
 }

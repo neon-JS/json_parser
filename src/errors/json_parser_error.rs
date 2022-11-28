@@ -75,6 +75,6 @@ impl fmt::Display for JsonParserError {
 
 impl fmt::Debug for JsonParserError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        return write!(f, "{}", self.to_string());
+        return write!(f, "{}", self);
     }
 }

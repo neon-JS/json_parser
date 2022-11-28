@@ -15,6 +15,6 @@ impl fmt::Display for JsonStreamError {
 
 impl fmt::Debug for JsonStreamError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        return write!(f, "{}", self.to_string());
+        return write!(f, "{}", self);
     }
 }

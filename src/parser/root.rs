@@ -16,7 +16,7 @@ impl Parser for ParserRoot {
     fn parse(stream: &mut JsonStream) -> Result<Property, JsonParserError> {
         stream.skip_whitespaces();
 
-        return match stream.peek() {
+        match stream.peek() {
             Some(ARRAY_OPENING_BRACKET) => ParserArray::parse(stream),
             Some('t')
             | Some('f') => ParserBool::parse(stream),
@@ -36,6 +36,6 @@ impl Parser for ParserRoot {
             Some(DOUBLE_QUOTES) => ParserString::parse(stream),
             Some(token) => Err(UnknownToken(token)),
             None => Err(UnexpectedEndOfData),
-        };
+        }
     }
 }
