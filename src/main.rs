@@ -10,6 +10,11 @@ mod parser {
     pub mod object;
     pub mod string;
     pub mod root;
+
+    pub mod sequences {
+        pub mod escape_sequence;
+        pub mod unicode_sequence;
+    }
 }
 
 mod traits {
@@ -27,10 +32,10 @@ mod errors {
 }
 
 fn main() {
-    let mut x = JsonStream::create("{\"a\": [1, {\"b\": null}], \"b\": true}");
+    let mut x = JsonStream::create("\"x\\uD834\\uDD1E\\u002Fy\"");
 
     let res = ParserRoot::parse(&mut x);
     let r2 = res.unwrap();
 
-    print!("{}", r2);
+    print!("{}", r2.string.unwrap());
 }

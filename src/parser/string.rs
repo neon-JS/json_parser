@@ -1,6 +1,8 @@
 use crate::traits::parser::Parser;
 use crate::errors::json_parser_error::JsonParserError;
 use crate::errors::json_parser_error::JsonParserError::{InvalidStringOpeningToken, UnexpectedEndOfData};
+use crate::parser::sequences::escape_sequence::ParserEscapeSequence;
+use crate::parser::sequences::unicode_sequence::ParserUnicodeSequence;
 use crate::structures::json_stream::JsonStream;
 use crate::structures::property::Property;
 
@@ -9,7 +11,6 @@ pub const DOUBLE_QUOTES: char = '"';
 
 pub struct ParserString {}
 
-// TODO: Special & escaped characters, line breaks etc.
 impl Parser for ParserString {
     fn parse(stream: &mut JsonStream) -> Result<Property, JsonParserError> {
         stream.skip_whitespaces();
@@ -22,14 +23,15 @@ impl Parser for ParserString {
 
         stream.consume(1).unwrap();
 
-        let mut char_is_escaped = false;
-        let mut characters = Vec::new();
+        let mut result = String::new();
 
-        while let Some(character) = stream.next() {
-            if character == DOUBLE_QUOTES && !char_is_escaped {
+        while let Some(character) = stream.peek() {
+            if character == DOUBLE_QUOTES {
+                stream.consume(1).unwrap();
+
                 return Ok(Property {
                     number: None,
-                    string: Some(String::from(&characters.into_iter().collect::<String>())),
+                    string: Some(result),
                     array: None,
                     object: None,
                     bool: None,
@@ -37,18 +39,24 @@ impl Parser for ParserString {
                 });
             }
 
-            if character == BACKTICK && !char_is_escaped {
-                // Escape next character
-                char_is_escaped = true;
-                continue;
-            } else if !char_is_escaped {
-                // TODO: Handle escaped chars!
-                characters.push(character);
+            if character == BACKTICK {
+                let sequence_property = if stream.peek_equals("\\u") {
+                    ParserUnicodeSequence::parse(stream)
+                } else {
+                    ParserEscapeSequence::parse(stream)
+                };
+
+                match sequence_property {
+                    Ok(escaped_char) => {
+                        result.push_str(escaped_char.string.unwrap().as_str());
+                        continue;
+                    }
+                    Err(inner) => return Err(inner)
+                }
             }
 
-            if char_is_escaped {
-                char_is_escaped = false
-            }
+            result.push(character);
+            stream.consume(1).unwrap();
         }
 
         Err(UnexpectedEndOfData)

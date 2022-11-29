@@ -22,6 +22,10 @@ pub enum JsonParserError {
 
     InvalidStringOpeningToken(char),
 
+    InvalidEscapeSequenceOpeningToken(char),
+    InvalidEscapeSequenceToken(char),
+    InvalidEscapeSequence,
+
     UnexpectedEndOfData,
 
     UnknownToken(char),
@@ -64,11 +68,18 @@ impl fmt::Display for JsonParserError {
             JsonParserError::InvalidStringOpeningToken(token)
             => write!(f, "Could not parse string: Invalid opening token. Expected: [\"]. Got: '{}'", token),
 
+            JsonParserError::InvalidEscapeSequenceOpeningToken(token)
+            => write!(f, "Could not parse string: Invalid escape sequence token. Expected: [\\]. Got '{}'", token),
+            JsonParserError::InvalidEscapeSequenceToken(token)
+            => write!(f, "Could not parse string: Invalid escape sequence type. Expected: [\\/\"bfnrtu]. Got '{}'", token),
+            JsonParserError::InvalidEscapeSequence
+            => write!(f, "Could not parse string: Invalid escape sequence."),
+
             JsonParserError::UnexpectedEndOfData
-            => write!(f, "Could not parse JSON. Unexpected end of data"),
+            => write!(f, "Could not parse JSON. Unexpected end of data."),
 
             JsonParserError::UnknownToken(token)
-            => write!(f, "Could not parse JSON. Unexpected token (Got: '{}')", token)
+            => write!(f, "Could not parse JSON. Unexpected token. Got: '{}'", token)
         }
     }
 }
