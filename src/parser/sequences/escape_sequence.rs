@@ -5,24 +5,21 @@ use crate::constants::token::{
 use crate::errors::json_parser_error::JsonParserError::{
     InvalidEscapeSequenceOpeningToken, InvalidEscapeSequenceToken, UnexpectedEndOfData,
 };
-use crate::traits::parser::Parser;
 use crate::errors::json_parser_error::JsonParserError;
 use crate::structures::json_stream::JsonStream;
-use crate::structures::property::Property;
+use crate::traits::escape_sequence_parser::EscapeSequenceParser;
 
 pub struct ParserEscapeSequence {}
 
-impl Parser for ParserEscapeSequence {
-    fn parse(stream: &mut JsonStream) -> Result<Property, JsonParserError> {
+impl EscapeSequenceParser for ParserEscapeSequence {
+    fn parse(stream: &mut JsonStream) -> Result<char, JsonParserError> {
         stream.skip_whitespaces();
 
-        match stream.peek() {
+        match stream.next() {
             Some(ESC_SEQUENCE_CHARACTER) => (),
             Some(token) => return Err(InvalidEscapeSequenceOpeningToken(token)),
             None => return Err(UnexpectedEndOfData),
         }
-
-        stream.consume(1).unwrap();
 
         let replaced_character = match stream.next() {
             Some(ESC_CARRIAGE_RETURN) => '\r',
@@ -37,13 +34,6 @@ impl Parser for ParserEscapeSequence {
             None => return Err(UnexpectedEndOfData)
         };
 
-        return Ok(Property {
-            number: None,
-            string: Some(String::from(replaced_character)),
-            array: None,
-            object: None,
-            bool: None,
-            is_null: false,
-        });
+        return Ok(replaced_character);
     }
 }

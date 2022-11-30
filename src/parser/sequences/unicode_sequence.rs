@@ -6,30 +6,27 @@ use crate::errors::json_parser_error::JsonParserError::{
     InvalidEscapeSequence, InvalidEscapeSequenceOpeningToken, InvalidEscapeSequenceToken,
     UnexpectedEndOfData,
 };
-use crate::traits::parser::Parser;
 use crate::errors::json_parser_error::JsonParserError;
 use crate::structures::json_stream::JsonStream;
-use crate::structures::property::Property;
+use crate::traits::escape_sequence_parser::EscapeSequenceParser;
 
 pub struct ParserUnicodeSequence {}
 
-impl Parser for ParserUnicodeSequence {
-    fn parse(stream: &mut JsonStream) -> Result<Property, JsonParserError> {
+impl EscapeSequenceParser for ParserUnicodeSequence {
+    fn parse(stream: &mut JsonStream) -> Result<char, JsonParserError> {
         stream.skip_whitespaces();
 
-        match stream.peek() {
+        match stream.next() {
             Some(ESC_SEQUENCE_CHARACTER) => (),
             Some(token) => return Err(InvalidEscapeSequenceOpeningToken(token)),
             None => return Err(UnexpectedEndOfData),
         }
-        stream.consume(1).unwrap();
 
         match stream.next() {
             Some(ESC_UNICODE_SEQUENCE_CHARACTER) => (),
             Some(token) => return Err(InvalidEscapeSequenceToken(token)),
             None => return Err(UnexpectedEndOfData)
         };
-        stream.consume(1).unwrap();
 
         let mut unicode_value;
 
@@ -52,14 +49,7 @@ impl Parser for ParserUnicodeSequence {
         }
 
         return match char::from_u32(unicode_value) {
-            Some(result) => Ok(Property {
-                number: None,
-                string: Some(String::from(result)),
-                array: None,
-                object: None,
-                bool: None,
-                is_null: false,
-            }),
+            Some(result) => Ok(result),
             None => Err(InvalidEscapeSequence)
         };
     }
@@ -69,7 +59,7 @@ impl ParserUnicodeSequence {
     /// Parses the next four chars of the `json_stream` into a hexadecimal number aka 'code unit'
     fn parse_utf_16_code_unit(json_stream: &mut JsonStream) -> Result<u32, JsonParserError>
     {
-        let mut code_point = 0;
+        let mut code_unit = 0;
 
         for exponent in (0..4).rev() {
             /* I really don't want to work with strings for performance reasons */
@@ -78,17 +68,17 @@ impl ParserUnicodeSequence {
             match json_stream.next() {
                 Some(character) => {
                     if (NUM_ZERO..=NUM_NINE).contains(&character) {
-                        code_point += multiplier * (character as u32 - NUM_ZERO as u32);
+                        code_unit += multiplier * (character as u32 - NUM_ZERO as u32);
                     } else if (NUM_HEX_A_CAPITAL..=NUM_HEX_F_CAPITAL).contains(&character) {
-                        code_point += multiplier * (character as u32 + 10 - NUM_HEX_A_CAPITAL as u32);
+                        code_unit += multiplier * (character as u32 + 10 - NUM_HEX_A_CAPITAL as u32);
                     } else if (NUM_HEX_A_SMALL..=NUM_HEX_F_SMALL).contains(&character) {
-                        code_point += multiplier * (character as u32 + 10 - NUM_HEX_A_SMALL as u32);
+                        code_unit += multiplier * (character as u32 + 10 - NUM_HEX_A_SMALL as u32);
                     }
                 }
                 None => return Err(UnexpectedEndOfData)
             };
         }
 
-        return Ok(code_point);
+        return Ok(code_unit);
     }
 }

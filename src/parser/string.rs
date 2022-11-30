@@ -10,6 +10,7 @@ use crate::parser::sequences::escape_sequence::ParserEscapeSequence;
 use crate::parser::sequences::unicode_sequence::ParserUnicodeSequence;
 use crate::structures::json_stream::JsonStream;
 use crate::structures::property::Property;
+use crate::traits::escape_sequence_parser::EscapeSequenceParser;
 
 pub struct ParserString {}
 
@@ -17,13 +18,11 @@ impl Parser for ParserString {
     fn parse(stream: &mut JsonStream) -> Result<Property, JsonParserError> {
         stream.skip_whitespaces();
 
-        match stream.peek() {
+        match stream.next() {
             Some(STRING_START) => (),
             Some(token) => return Err(InvalidStringOpeningToken(token)),
             None => return Err(UnexpectedEndOfData),
         }
-
-        stream.consume(1).unwrap();
 
         let mut result = String::new();
 
@@ -50,7 +49,7 @@ impl Parser for ParserString {
 
                 match sequence_property {
                     Ok(escaped_char) => {
-                        result.push_str(escaped_char.string.unwrap().as_str());
+                        result.push(escaped_char);
                         continue;
                     }
                     Err(inner) => return Err(inner)

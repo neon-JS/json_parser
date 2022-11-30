@@ -2,28 +2,8 @@ use crate::traits::parser::Parser;
 use crate::parser::root::ParserRoot;
 use crate::structures::json_stream::JsonStream;
 
-mod parser {
-    pub mod array;
-    pub mod bool;
-    pub mod null;
-    pub mod number;
-    pub mod object;
-    pub mod string;
-    pub mod root;
-
-    pub mod sequences {
-        pub mod escape_sequence;
-        pub mod unicode_sequence;
-    }
-}
-
-mod traits {
-    pub mod parser;
-}
-
-mod structures {
-    pub mod json_stream;
-    pub mod property;
+mod constants {
+    pub mod token;
 }
 
 mod errors {
@@ -31,8 +11,29 @@ mod errors {
     pub mod json_stream_error;
 }
 
-mod constants {
-    pub mod token;
+mod parser {
+    pub mod sequences {
+        pub mod escape_sequence;
+        pub mod unicode_sequence;
+    }
+
+    pub mod array;
+    pub mod bool;
+    pub mod null;
+    pub mod number;
+    pub mod object;
+    pub mod root;
+    pub mod string;
+}
+
+mod structures {
+    pub mod json_stream;
+    pub mod property;
+}
+
+mod traits {
+    pub mod escape_sequence_parser;
+    pub mod parser;
 }
 
 fn main() {

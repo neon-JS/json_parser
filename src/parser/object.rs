@@ -19,13 +19,11 @@ impl Parser for ParserObject {
     fn parse(stream: &mut JsonStream) -> Result<Property, JsonParserError> {
         stream.skip_whitespaces();
 
-        match stream.peek() {
+        match stream.next() {
             Some(OBJECT_BRACKET_OPEN) => (),
             Some(token) => return Err(InvalidObjectOpeningToken(token)),
             None => return Err(UnexpectedEndOfData),
         }
-
-        stream.consume(1).unwrap();
 
         let mut properties: HashMap<String, Box<Property>> = HashMap::new();
 

@@ -25,7 +25,23 @@ impl fmt::Display for Property {
         }
 
         if let Some(string) = &self.string {
-            return write!(f, "{}", string);
+            let mut buffer: [u16; 2] = [0; 2];
+            let mut encoded_string = String::new();
+
+            for char in string.chars() {
+                if char.is_ascii() {
+                    encoded_string.push(char);
+                    continue;
+                }
+
+                /* reconvert back to \u1234 */
+                let encoded_character_buffer = char.encode_utf16(&mut buffer);
+                for &mut character_value in encoded_character_buffer {
+                    encoded_string.push_str(format!("\\u{:X}", character_value).as_str());
+                }
+            }
+
+            return write!(f, "\"{}\"", encoded_string);
         }
 
         if let Some(array) = &self.array {
@@ -42,7 +58,7 @@ impl fmt::Display for Property {
         if let Some(object) = &self.object {
             let mut properties = object
                 .iter()
-                .map(|(key, value)| format!("\"{}\": {}", key, value))
+                .map(|(key, value)| format!("{}: {}", key, value))
                 .collect::<Vec<String>>();
 
             properties.sort();

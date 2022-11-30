@@ -14,13 +14,11 @@ impl Parser for ParserArray {
     fn parse(stream: &mut JsonStream) -> Result<Property, JsonParserError> {
         stream.skip_whitespaces();
 
-        match stream.peek() {
+        match stream.next() {
             Some(ARRAY_BRACKET_OPEN) => (),
             Some(token) => return Err(InvalidArrayOpeningToken(token)),
             None => return Err(UnexpectedEndOfData),
         }
-
-        stream.consume(1).unwrap();
 
         let mut properties = Vec::new();
 
