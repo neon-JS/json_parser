@@ -1,5 +1,5 @@
 use std::fmt;
-use crate::constants::token::{TABULATION, WHITESPACE};
+use crate::constants::token::{CARRIAGE_RETURN, LINE_FEED, TABULATION, WHITESPACE};
 use crate::errors::json_stream_error::JsonStreamError;
 use crate::errors::json_stream_error::JsonStreamError::OutOfRange;
 
@@ -52,17 +52,13 @@ impl JsonStream<'_> {
                 return;
             }
 
-            if self.stream[self.pointer] as char == WHITESPACE {
-                self.pointer += 1;
-                continue;
+            match self.stream[self.pointer] as char {
+                WHITESPACE | TABULATION | CARRIAGE_RETURN | LINE_FEED => {
+                    self.pointer += 1;
+                    continue;
+                }
+                _ => return,
             }
-
-            if self.stream[self.pointer] as char == TABULATION {
-                self.pointer += 1;
-                continue;
-            }
-
-            return;
         }
     }
 

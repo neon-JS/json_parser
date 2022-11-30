@@ -58,7 +58,7 @@ impl fmt::Display for Property {
         if let Some(object) = &self.object {
             let mut properties = object
                 .iter()
-                .map(|(key, value)| format!("{}: {}", key, value))
+                .map(|(key, value)| format!("\"{}\": {}", key, value))
                 .collect::<Vec<String>>();
 
             properties.sort();

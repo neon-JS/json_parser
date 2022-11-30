@@ -48,7 +48,7 @@ impl fmt::Display for JsonParserError {
             JsonParserError::InvalidNumberFormat(failed)
             => write!(f, "Could not parse number: Invalid number format. Got: '{}'", failed),
             JsonParserError::InvalidNumberToken(token)
-            => write!(f, "Could not parse number: Invalid token. Expected: [0-9\\-eE]. Got: '{}'", token),
+            => write!(f, "Could not parse number: Invalid token. Expected: [0-9\\-+eE]. Got: '{}'", token),
             JsonParserError::MultipleNumberDecimalPoints
             => write!(f, "Could not parse number: Contains multiple decimal points [.]"),
             JsonParserError::MultipleNumberExponentSigns

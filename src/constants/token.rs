@@ -14,6 +14,7 @@ pub const ESC_UNICODE_SEQUENCE_CHARACTER: char = 'u';
 pub const ESC_UNICODE_IDENTIFIER: &str = "\\u";
 
 /* Number */
+pub const NUM_PLUS: char = '+';
 pub const NUM_MINUS: char = '-';
 pub const NUM_DECIMAL_POINT: char = '.';
 pub const NUM_EXPONENT_SIGN_LOWERCASE: char = 'e';
@@ -63,3 +64,5 @@ pub const STRING_END: char = '"';
 /* JsonStream */
 pub const WHITESPACE: char = ' ';
 pub const TABULATION: char = '\t';
+pub const CARRIAGE_RETURN: char = '\r';
+pub const LINE_FEED: char = '\n';
