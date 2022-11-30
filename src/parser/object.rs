@@ -3,7 +3,7 @@ use crate::constants::token::{
 };
 use crate::errors::json_parser_error::JsonParserError::{
     DuplicateKey, InvalidObjectKey, InvalidObjectKeyValueSeparatorToken, InvalidObjectOpeningToken,
-    UnexpectedEndOfData, InvalidObjectProperty,
+    UnexpectedEndOfData, InvalidObjectProperty, InvalidObjectPrecedingSeparator
 };
 use std::collections::HashMap;
 use crate::traits::parser::Parser;
@@ -43,6 +43,9 @@ impl Parser for ParserObject {
                     });
                 }
                 Some(OBJECT_PROPERTY_SEPARATOR) => {
+                    if properties.is_empty() {
+                        return Err(InvalidObjectPrecedingSeparator)
+                    }
                     stream.consume(1).unwrap();
                 }
                 None => return Err(UnexpectedEndOfData),

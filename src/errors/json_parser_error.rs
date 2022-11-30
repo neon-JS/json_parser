@@ -4,6 +4,7 @@ use std::fmt::Formatter;
 pub enum JsonParserError {
     InvalidArrayOpeningToken(char),
     InvalidArrayProperty(Box<JsonParserError>),
+    InvalidArrayPrecedingSeparator,
 
     InvalidBoolToken,
 
@@ -19,6 +20,7 @@ pub enum JsonParserError {
     InvalidObjectKeyValueSeparatorToken(char),
     InvalidObjectOpeningToken(char),
     InvalidObjectProperty(Box<JsonParserError>),
+    InvalidObjectPrecedingSeparator,
 
     InvalidStringOpeningToken(char),
 
@@ -38,6 +40,8 @@ impl fmt::Display for JsonParserError {
             => write!(f, "Could not parse array: Invalid opening token. Expected: [[], Got: '{}'", token),
             JsonParserError::InvalidArrayProperty(inner)
             => write!(f, "Could not parse array: Invalid property. Inner: {}", inner),
+            JsonParserError::InvalidArrayPrecedingSeparator
+            => write!(f, "Could not parse array: Preceding comma."),
 
             JsonParserError::InvalidBoolToken
             => write!(f, "Could not parse bool: Invalid token. Expected: (true|false)"),
@@ -64,6 +68,8 @@ impl fmt::Display for JsonParserError {
             => write!(f, "Could not parse object: Invalid opening token. Expected: [{{]. Got: '{}'", token),
             JsonParserError::InvalidObjectProperty(inner)
             => write!(f, "Could not parse object: Invalid property. Inner: {}", inner),
+            JsonParserError::InvalidObjectPrecedingSeparator
+            => write!(f, "Could not parse object: Preceding comma."),
 
             JsonParserError::InvalidStringOpeningToken(token)
             => write!(f, "Could not parse string: Invalid opening token. Expected: [\"]. Got: '{}'", token),

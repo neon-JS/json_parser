@@ -21,19 +21,17 @@ impl EscapeSequenceParser for ParserEscapeSequence {
             None => return Err(UnexpectedEndOfData),
         }
 
-        let replaced_character = match stream.next() {
-            Some(ESC_CARRIAGE_RETURN) => '\r',
-            Some(ESC_REVERSE_SOLIDUS) => '\\',
-            Some(ESC_QUOTATION_MARK) => '"',
-            Some(ESC_TABULATION) => '\t',
-            Some(ESC_BACKSPACE) => '\x08',
-            Some(ESC_FORM_FEED) => '\x0c',
-            Some(ESC_LINE_FEED) => '\n',
-            Some(ESC_SOLIDUS) => '/',
-            Some(token) => return Err(InvalidEscapeSequenceToken(token)),
-            None => return Err(UnexpectedEndOfData)
-        };
-
-        Ok(replaced_character)
+        match stream.next() {
+            Some(ESC_CARRIAGE_RETURN) => Ok('\r'),
+            Some(ESC_REVERSE_SOLIDUS) => Ok('\\'),
+            Some(ESC_QUOTATION_MARK) => Ok('"'),
+            Some(ESC_TABULATION) => Ok('\t'),
+            Some(ESC_BACKSPACE) => Ok('\x08'),
+            Some(ESC_FORM_FEED) => Ok('\x0c'),
+            Some(ESC_LINE_FEED) => Ok('\n'),
+            Some(ESC_SOLIDUS) => Ok('/'),
+            Some(token) => Err(InvalidEscapeSequenceToken(token)),
+            None => Err(UnexpectedEndOfData)
+        }
     }
 }

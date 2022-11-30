@@ -34,7 +34,7 @@ pub const NUM_NINE: char = '9';
 pub const NUM_HEX_A_CAPITAL: char = 'A';
 pub const NUM_HEX_F_CAPITAL: char = 'F';
 pub const NUM_HEX_A_SMALL: char = 'a';
-pub const NUM_HEX_F_SMALL: char = 'F';
+pub const NUM_HEX_F_SMALL: char = 'f';
 
 /* Array */
 pub const ARRAY_BRACKET_OPEN: char = '[';

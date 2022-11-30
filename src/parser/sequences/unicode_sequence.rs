@@ -4,7 +4,7 @@ use crate::constants::token::{
 };
 use crate::errors::json_parser_error::JsonParserError::{
     InvalidEscapeSequence, InvalidEscapeSequenceOpeningToken, InvalidEscapeSequenceToken,
-    UnexpectedEndOfData,
+    UnexpectedEndOfData, UnknownToken
 };
 use crate::errors::json_parser_error::JsonParserError;
 use crate::structures::json_stream::JsonStream;
@@ -65,17 +65,12 @@ impl ParserUnicodeSequence {
             /* I really don't want to work with strings for performance reasons */
             let multiplier = 16u32.pow(exponent);
 
-            match json_stream.next() {
-                Some(character) => {
-                    if (NUM_ZERO..=NUM_NINE).contains(&character) {
-                        code_unit += multiplier * (character as u32 - NUM_ZERO as u32);
-                    } else if (NUM_HEX_A_CAPITAL..=NUM_HEX_F_CAPITAL).contains(&character) {
-                        code_unit += multiplier * (character as u32 + 10 - NUM_HEX_A_CAPITAL as u32);
-                    } else if (NUM_HEX_A_SMALL..=NUM_HEX_F_SMALL).contains(&character) {
-                        code_unit += multiplier * (character as u32 + 10 - NUM_HEX_A_SMALL as u32);
-                    }
-                }
-                None => return Err(UnexpectedEndOfData)
+            code_unit += multiplier * match json_stream.next() {
+                Some(c @ NUM_ZERO..=NUM_NINE) => (c as u32 - NUM_ZERO as u32),
+                Some(c @ NUM_HEX_A_SMALL..=NUM_HEX_F_SMALL) => (c as u32 + 10 - NUM_HEX_A_SMALL as u32),
+                Some(c @ NUM_HEX_A_CAPITAL..=NUM_HEX_F_CAPITAL) => (c as u32 + 10 - NUM_HEX_A_CAPITAL as u32),
+                Some(token) => return Err(UnknownToken(token)),
+                None => return Err(UnexpectedEndOfData),
             };
         }
 

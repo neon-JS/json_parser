@@ -1,6 +1,7 @@
 use crate::constants::token::{ARRAY_BRACKET_CLOSE, ARRAY_BRACKET_OPEN, ARRAY_PROPERTY_SEPARATOR};
 use crate::errors::json_parser_error::JsonParserError::{
-    InvalidArrayOpeningToken, InvalidArrayProperty, UnexpectedEndOfData,
+    InvalidArrayOpeningToken, InvalidArrayPrecedingSeparator, InvalidArrayProperty,
+    UnexpectedEndOfData
 };
 use crate::traits::parser::Parser;
 use crate::errors::json_parser_error::JsonParserError;
@@ -38,6 +39,9 @@ impl Parser for ParserArray {
                     });
                 }
                 Some(ARRAY_PROPERTY_SEPARATOR) => {
+                    if properties.is_empty() {
+                        return Err(InvalidArrayPrecedingSeparator)
+                    }
                     stream.consume(1).unwrap();
                 }
                 None => return Err(UnexpectedEndOfData),
