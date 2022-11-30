@@ -19,17 +19,19 @@ impl Parser for ParserNumber {
         stream.skip_whitespaces();
 
         match stream.peek() {
-            Some(NUM_MINUS)
-            | Some(NUM_ZERO)
-            | Some(NUM_ONE)
-            | Some(NUM_TWO)
-            | Some(NUM_THREE)
-            | Some(NUM_FOUR)
-            | Some(NUM_FIVE)
-            | Some(NUM_SIX)
-            | Some(NUM_SEVEN)
-            | Some(NUM_EIGHT)
-            | Some(NUM_NINE)
+            Some(
+                NUM_MINUS
+                | NUM_ZERO
+                | NUM_ONE
+                | NUM_TWO
+                | NUM_THREE
+                | NUM_FOUR
+                | NUM_FIVE
+                | NUM_SIX
+                | NUM_SEVEN
+                | NUM_EIGHT
+                | NUM_NINE
+            )
             => (),
             Some(token) => return Err(InvalidNumberToken(token)),
             None => return Err(UnexpectedEndOfData),
@@ -67,13 +69,9 @@ impl Parser for ParserNumber {
             break;
         }
 
-        match characters.last() {
-            Some(&NUM_EXPONENT_SIGN_LOWERCASE)
-            | Some(&NUM_EXPONENT_SIGN_UPPERCASE)
-            | Some(&NUM_MINUS)
-            => return Err(UnexpectedEndOfData),
-            _ => ()
-        };
+        if let Some(&(NUM_EXPONENT_SIGN_LOWERCASE | NUM_EXPONENT_SIGN_UPPERCASE | NUM_MINUS)) = characters.last() {
+            return Err(UnexpectedEndOfData)
+        }
 
         let number_as_string = characters.into_iter().collect::<String>();
 

@@ -47,7 +47,7 @@ impl fmt::Display for Property {
         if let Some(array) = &self.array {
             let mut properties = array
                 .iter()
-                .map(|prop| prop.to_string())
+                .map(std::string::ToString::to_string)
                 .collect::<Vec<String>>();
 
             properties.sort();

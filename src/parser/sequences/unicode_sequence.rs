@@ -48,10 +48,10 @@ impl EscapeSequenceParser for ParserUnicodeSequence {
             };
         }
 
-        return match char::from_u32(unicode_value) {
+        match char::from_u32(unicode_value) {
             Some(result) => Ok(result),
             None => Err(InvalidEscapeSequence)
-        };
+        }
     }
 }
 
@@ -79,6 +79,6 @@ impl ParserUnicodeSequence {
             };
         }
 
-        return Ok(code_unit);
+        Ok(code_unit)
     }
 }

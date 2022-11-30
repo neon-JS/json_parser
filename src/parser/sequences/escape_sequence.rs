@@ -34,6 +34,6 @@ impl EscapeSequenceParser for ParserEscapeSequence {
             None => return Err(UnexpectedEndOfData)
         };
 
-        return Ok(replaced_character);
+        Ok(replaced_character)
     }
 }

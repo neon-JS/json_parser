@@ -23,20 +23,21 @@ impl Parser for ParserRoot {
 
         match stream.peek() {
             Some(ARRAY_BRACKET_OPEN) => ParserArray::parse(stream),
-            Some(IDENTIFIER_BOOL_TRUE)
-            | Some(IDENTIFIER_BOOL_FALSE) => ParserBool::parse(stream),
+            Some(IDENTIFIER_BOOL_TRUE | IDENTIFIER_BOOL_FALSE) => ParserBool::parse(stream),
             Some(IDENTIFIER_NULL) => ParserNull::parse(stream),
-            Some(NUM_MINUS)
-            | Some(NUM_ZERO)
-            | Some(NUM_ONE)
-            | Some(NUM_TWO)
-            | Some(NUM_THREE)
-            | Some(NUM_FOUR)
-            | Some(NUM_FIVE)
-            | Some(NUM_SIX)
-            | Some(NUM_SEVEN)
-            | Some(NUM_EIGHT)
-            | Some(NUM_NINE) => ParserNumber::parse(stream),
+            Some(
+                NUM_MINUS
+                | NUM_ZERO
+                | NUM_ONE
+                | NUM_TWO
+                | NUM_THREE
+                | NUM_FOUR
+                | NUM_FIVE
+                | NUM_SIX
+                | NUM_SEVEN
+                | NUM_EIGHT
+                | NUM_NINE
+            ) => ParserNumber::parse(stream),
             Some(OBJECT_BRACKET_OPEN) => ParserObject::parse(stream),
             Some(STRING_START) => ParserString::parse(stream),
             Some(token) => Err(UnknownToken(token)),
