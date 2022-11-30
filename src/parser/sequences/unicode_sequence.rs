@@ -66,9 +66,9 @@ impl ParserUnicodeSequence {
             let multiplier = 16u32.pow(exponent);
 
             code_unit += multiplier * match json_stream.next() {
-                Some(c @ NUM_ZERO..=NUM_NINE) => (c as u32 - NUM_ZERO as u32),
-                Some(c @ NUM_HEX_A_SMALL..=NUM_HEX_F_SMALL) => (c as u32 + 10 - NUM_HEX_A_SMALL as u32),
-                Some(c @ NUM_HEX_A_CAPITAL..=NUM_HEX_F_CAPITAL) => (c as u32 + 10 - NUM_HEX_A_CAPITAL as u32),
+                Some(c @ NUM_ZERO..=NUM_NINE) => c as u32 - NUM_ZERO as u32,
+                Some(c @ NUM_HEX_A_SMALL..=NUM_HEX_F_SMALL) => c as u32 + 10 - NUM_HEX_A_SMALL as u32,
+                Some(c @ NUM_HEX_A_CAPITAL..=NUM_HEX_F_CAPITAL) => c as u32 + 10 - NUM_HEX_A_CAPITAL as u32,
                 Some(token) => return Err(UnknownToken(token)),
                 None => return Err(UnexpectedEndOfData),
             };

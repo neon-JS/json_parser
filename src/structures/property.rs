@@ -66,6 +66,6 @@ impl fmt::Display for Property {
             return write!(f, "{{{}}}", properties.join(", "));
         }
 
-        return write!(f, "<EMPTY>");
+        write!(f, "<EMPTY>")
     }
 }
