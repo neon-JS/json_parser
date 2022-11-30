@@ -31,6 +31,10 @@ mod errors {
     pub mod json_stream_error;
 }
 
+mod constants {
+    pub mod token;
+}
+
 fn main() {
     let mut x = JsonStream::create("\"x\\uD834\\uDD1E\\u002Fy\"");
 

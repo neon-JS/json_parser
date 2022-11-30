@@ -1,19 +1,17 @@
-use std::collections::HashMap;
-use crate::traits::parser::Parser;
-use crate::errors::json_parser_error::JsonParserError;
+use crate::constants::token::{
+    OBJECT_BRACKET_CLOSE, OBJECT_BRACKET_OPEN, OBJECT_KEY_VALUE_SEPARATOR, OBJECT_PROPERTY_SEPARATOR,
+};
 use crate::errors::json_parser_error::JsonParserError::{
     DuplicateKey, InvalidObjectKey, InvalidObjectKeyValueSeparatorToken, InvalidObjectOpeningToken,
     UnexpectedEndOfData, InvalidObjectProperty,
 };
+use std::collections::HashMap;
+use crate::traits::parser::Parser;
+use crate::errors::json_parser_error::JsonParserError;
 use crate::structures::json_stream::JsonStream;
 use crate::structures::property::Property;
 use crate::parser::root::ParserRoot;
 use crate::parser::string::ParserString;
-
-pub const OBJECT_OPENING_BRACKET: char = '{';
-const OBJECT_CLOSING_BRACKET: char = '}';
-const PROPERTY_SEPARATOR: char = ',';
-const KEY_VALUE_SEPARATOR: char = ':';
 
 pub struct ParserObject {}
 
@@ -22,7 +20,7 @@ impl Parser for ParserObject {
         stream.skip_whitespaces();
 
         match stream.peek() {
-            Some(OBJECT_OPENING_BRACKET) => (),
+            Some(OBJECT_BRACKET_OPEN) => (),
             Some(token) => return Err(InvalidObjectOpeningToken(token)),
             None => return Err(UnexpectedEndOfData),
         }
@@ -35,7 +33,7 @@ impl Parser for ParserObject {
             stream.skip_whitespaces();
 
             match stream.peek() {
-                Some(OBJECT_CLOSING_BRACKET) => {
+                Some(OBJECT_BRACKET_CLOSE) => {
                     stream.consume(1).unwrap();
                     return Ok(Property {
                         number: None,
@@ -46,7 +44,7 @@ impl Parser for ParserObject {
                         is_null: false,
                     });
                 }
-                Some(PROPERTY_SEPARATOR) => {
+                Some(OBJECT_PROPERTY_SEPARATOR) => {
                     stream.consume(1).unwrap();
                 }
                 None => return Err(UnexpectedEndOfData),
@@ -60,7 +58,7 @@ impl Parser for ParserObject {
 
             stream.skip_whitespaces();
             match stream.next() {
-                Some(KEY_VALUE_SEPARATOR) => (),
+                Some(OBJECT_KEY_VALUE_SEPARATOR) => (),
                 Some(token) => return Err(InvalidObjectKeyValueSeparatorToken(token)),
                 None => return Err(UnexpectedEndOfData),
             }

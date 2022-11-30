@@ -1,13 +1,16 @@
+use crate::constants::token::{
+    NUM_EIGHT, NUM_FIVE, NUM_FOUR, NUM_NINE, NUM_ONE, NUM_SEVEN, NUM_SIX, NUM_THREE, NUM_TWO,
+    NUM_ZERO, NUM_MINUS, NUM_DECIMAL_POINT, NUM_EXPONENT_SIGN_LOWERCASE,
+    NUM_EXPONENT_SIGN_UPPERCASE,
+};
+use crate::errors::json_parser_error::JsonParserError::{
+    InvalidNumberFormat, InvalidNumberToken, MultipleNumberDecimalPoints,
+    MultipleNumberExponentSigns, UnexpectedEndOfData,
+};
 use crate::traits::parser::Parser;
 use crate::errors::json_parser_error::JsonParserError;
-use crate::errors::json_parser_error::JsonParserError::{InvalidNumberFormat, InvalidNumberToken, MultipleNumberDecimalPoints, MultipleNumberExponentSigns, UnexpectedEndOfData};
 use crate::structures::json_stream::JsonStream;
 use crate::structures::property::Property;
-
-pub const MINUS: char = '-';
-const DECIMAL_POINT: char = '.';
-const LOWER_EXPONENT_SIGN: char = 'e';
-const UPPER_EXPONENT_SIGN: char = 'E';
 
 pub struct ParserNumber {}
 
@@ -16,17 +19,17 @@ impl Parser for ParserNumber {
         stream.skip_whitespaces();
 
         match stream.peek() {
-            Some(MINUS)
-            | Some('0')
-            | Some('1')
-            | Some('2')
-            | Some('3')
-            | Some('4')
-            | Some('5')
-            | Some('6')
-            | Some('7')
-            | Some('8')
-            | Some('9')
+            Some(NUM_MINUS)
+            | Some(NUM_ZERO)
+            | Some(NUM_ONE)
+            | Some(NUM_TWO)
+            | Some(NUM_THREE)
+            | Some(NUM_FOUR)
+            | Some(NUM_FIVE)
+            | Some(NUM_SIX)
+            | Some(NUM_SEVEN)
+            | Some(NUM_EIGHT)
+            | Some(NUM_NINE)
             => (),
             Some(token) => return Err(InvalidNumberToken(token)),
             None => return Err(UnexpectedEndOfData),
@@ -37,24 +40,24 @@ impl Parser for ParserNumber {
         let mut characters = vec!(stream.next().unwrap());
 
         while let Some(character) = stream.peek() {
-            if character == DECIMAL_POINT {
+            if character == NUM_DECIMAL_POINT {
                 if contains_decimal_point {
                     return Err(MultipleNumberDecimalPoints);
                 }
                 contains_decimal_point = true;
             }
 
-            if character == LOWER_EXPONENT_SIGN || character == UPPER_EXPONENT_SIGN {
+            if character == NUM_EXPONENT_SIGN_LOWERCASE || character == NUM_EXPONENT_SIGN_UPPERCASE {
                 if contains_exponent {
                     return Err(MultipleNumberExponentSigns);
                 }
                 contains_exponent = true;
             }
 
-            if ('0'..='9').contains(&character)
-                || character == LOWER_EXPONENT_SIGN
-                || character == UPPER_EXPONENT_SIGN
-                || character == DECIMAL_POINT
+            if (NUM_ZERO..=NUM_NINE).contains(&character)
+                || character == NUM_EXPONENT_SIGN_LOWERCASE
+                || character == NUM_EXPONENT_SIGN_UPPERCASE
+                || character == NUM_DECIMAL_POINT
             {
                 stream.consume(1).unwrap();
                 characters.push(character);
@@ -65,9 +68,9 @@ impl Parser for ParserNumber {
         }
 
         match characters.last() {
-            Some(&LOWER_EXPONENT_SIGN)
-            | Some(&UPPER_EXPONENT_SIGN)
-            | Some(&MINUS)
+            Some(&NUM_EXPONENT_SIGN_LOWERCASE)
+            | Some(&NUM_EXPONENT_SIGN_UPPERCASE)
+            | Some(&NUM_MINUS)
             => return Err(UnexpectedEndOfData),
             _ => ()
         };

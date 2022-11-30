@@ -1,14 +1,19 @@
+use crate::constants::token::{
+    ARRAY_BRACKET_OPEN, IDENTIFIER_BOOL_FALSE, IDENTIFIER_BOOL_TRUE, IDENTIFIER_NULL, NUM_EIGHT,
+    NUM_FIVE, NUM_FOUR, NUM_MINUS, NUM_NINE, NUM_ONE, NUM_SEVEN, NUM_SIX, NUM_THREE, NUM_TWO,
+    NUM_ZERO, OBJECT_BRACKET_OPEN, STRING_START,
+};
+use crate::errors::json_parser_error::JsonParserError::{UnexpectedEndOfData, UnknownToken};
 use crate::traits::parser::Parser;
 use crate::errors::json_parser_error::JsonParserError;
-use crate::errors::json_parser_error::JsonParserError::{UnexpectedEndOfData, UnknownToken};
 use crate::structures::json_stream::JsonStream;
 use crate::structures::property::Property;
-use crate::parser::array::{ParserArray, ARRAY_OPENING_BRACKET};
+use crate::parser::array::ParserArray;
 use crate::parser::bool::ParserBool;
 use crate::parser::null::ParserNull;
-use crate::parser::number::{ParserNumber, MINUS};
-use crate::parser::object::{ParserObject, OBJECT_OPENING_BRACKET};
-use crate::parser::string::{ParserString, DOUBLE_QUOTES};
+use crate::parser::number::ParserNumber;
+use crate::parser::object::ParserObject;
+use crate::parser::string::ParserString;
 
 pub struct ParserRoot {}
 
@@ -17,23 +22,23 @@ impl Parser for ParserRoot {
         stream.skip_whitespaces();
 
         match stream.peek() {
-            Some(ARRAY_OPENING_BRACKET) => ParserArray::parse(stream),
-            Some('t')
-            | Some('f') => ParserBool::parse(stream),
-            Some('n') => ParserNull::parse(stream),
-            Some(MINUS)
-            | Some('0')
-            | Some('1')
-            | Some('2')
-            | Some('3')
-            | Some('4')
-            | Some('5')
-            | Some('6')
-            | Some('7')
-            | Some('8')
-            | Some('9') => ParserNumber::parse(stream),
-            Some(OBJECT_OPENING_BRACKET) => ParserObject::parse(stream),
-            Some(DOUBLE_QUOTES) => ParserString::parse(stream),
+            Some(ARRAY_BRACKET_OPEN) => ParserArray::parse(stream),
+            Some(IDENTIFIER_BOOL_TRUE)
+            | Some(IDENTIFIER_BOOL_FALSE) => ParserBool::parse(stream),
+            Some(IDENTIFIER_NULL) => ParserNull::parse(stream),
+            Some(NUM_MINUS)
+            | Some(NUM_ZERO)
+            | Some(NUM_ONE)
+            | Some(NUM_TWO)
+            | Some(NUM_THREE)
+            | Some(NUM_FOUR)
+            | Some(NUM_FIVE)
+            | Some(NUM_SIX)
+            | Some(NUM_SEVEN)
+            | Some(NUM_EIGHT)
+            | Some(NUM_NINE) => ParserNumber::parse(stream),
+            Some(OBJECT_BRACKET_OPEN) => ParserObject::parse(stream),
+            Some(STRING_START) => ParserString::parse(stream),
             Some(token) => Err(UnknownToken(token)),
             None => Err(UnexpectedEndOfData),
         }

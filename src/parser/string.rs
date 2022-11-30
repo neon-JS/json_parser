@@ -1,13 +1,15 @@
+use crate::constants::token::{
+    ESC_SEQUENCE_CHARACTER, ESC_UNICODE_IDENTIFIER, STRING_END, STRING_START,
+};
+use crate::errors::json_parser_error::JsonParserError::{
+    InvalidStringOpeningToken, UnexpectedEndOfData,
+};
 use crate::traits::parser::Parser;
 use crate::errors::json_parser_error::JsonParserError;
-use crate::errors::json_parser_error::JsonParserError::{InvalidStringOpeningToken, UnexpectedEndOfData};
 use crate::parser::sequences::escape_sequence::ParserEscapeSequence;
 use crate::parser::sequences::unicode_sequence::ParserUnicodeSequence;
 use crate::structures::json_stream::JsonStream;
 use crate::structures::property::Property;
-
-const BACKTICK: char = '\\';
-pub const DOUBLE_QUOTES: char = '"';
 
 pub struct ParserString {}
 
@@ -16,7 +18,7 @@ impl Parser for ParserString {
         stream.skip_whitespaces();
 
         match stream.peek() {
-            Some(DOUBLE_QUOTES) => (),
+            Some(STRING_START) => (),
             Some(token) => return Err(InvalidStringOpeningToken(token)),
             None => return Err(UnexpectedEndOfData),
         }
@@ -26,7 +28,7 @@ impl Parser for ParserString {
         let mut result = String::new();
 
         while let Some(character) = stream.peek() {
-            if character == DOUBLE_QUOTES {
+            if character == STRING_END {
                 stream.consume(1).unwrap();
 
                 return Ok(Property {
@@ -39,8 +41,8 @@ impl Parser for ParserString {
                 });
             }
 
-            if character == BACKTICK {
-                let sequence_property = if stream.peek_equals("\\u") {
+            if character == ESC_SEQUENCE_CHARACTER {
+                let sequence_property = if stream.peek_equals(ESC_UNICODE_IDENTIFIER) {
                     ParserUnicodeSequence::parse(stream)
                 } else {
                     ParserEscapeSequence::parse(stream)

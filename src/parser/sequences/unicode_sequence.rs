@@ -1,10 +1,15 @@
+use crate::constants::token::{
+    ESC_SEQUENCE_CHARACTER, ESC_UNICODE_IDENTIFIER, ESC_UNICODE_SEQUENCE_CHARACTER,
+    NUM_HEX_A_CAPITAL, NUM_HEX_A_SMALL, NUM_HEX_F_CAPITAL, NUM_HEX_F_SMALL, NUM_NINE, NUM_ZERO,
+};
+use crate::errors::json_parser_error::JsonParserError::{
+    InvalidEscapeSequence, InvalidEscapeSequenceOpeningToken, InvalidEscapeSequenceToken,
+    UnexpectedEndOfData,
+};
 use crate::traits::parser::Parser;
 use crate::errors::json_parser_error::JsonParserError;
-use crate::errors::json_parser_error::JsonParserError::{InvalidEscapeSequence, InvalidEscapeSequenceOpeningToken, InvalidEscapeSequenceToken, UnexpectedEndOfData};
 use crate::structures::json_stream::JsonStream;
 use crate::structures::property::Property;
-
-const BACKTICK: char = '\\';
 
 pub struct ParserUnicodeSequence {}
 
@@ -13,14 +18,14 @@ impl Parser for ParserUnicodeSequence {
         stream.skip_whitespaces();
 
         match stream.peek() {
-            Some(BACKTICK) => (),
+            Some(ESC_SEQUENCE_CHARACTER) => (),
             Some(token) => return Err(InvalidEscapeSequenceOpeningToken(token)),
             None => return Err(UnexpectedEndOfData),
         }
         stream.consume(1).unwrap();
 
         match stream.next() {
-            Some('u') => (),
+            Some(ESC_UNICODE_SEQUENCE_CHARACTER) => (),
             Some(token) => return Err(InvalidEscapeSequenceToken(token)),
             None => return Err(UnexpectedEndOfData)
         };
@@ -33,7 +38,7 @@ impl Parser for ParserUnicodeSequence {
             Err(e) => return Err(e)
         };
 
-        if stream.peek_equals("\\u") {
+        if stream.peek_equals(ESC_UNICODE_IDENTIFIER) {
             /* ECMA-404 allows UTF-16 surrogate pairs. In that case, we have to transform the
              * surrogates into a code point.
              * See: https://en.wikipedia.org/wiki/UTF-16#Examples */
@@ -72,12 +77,12 @@ impl ParserUnicodeSequence {
 
             match json_stream.next() {
                 Some(character) => {
-                    if ('0'..='9').contains(&character) {
-                        code_point += multiplier * (character as u32 - '0' as u32);
-                    } else if ('A'..='F').contains(&character) {
-                        code_point += multiplier * (character as u32 + 10 - 'A' as u32);
-                    } else if ('a'..='f').contains(&character) {
-                        code_point += multiplier * (character as u32 + 10 - 'a' as u32);
+                    if (NUM_ZERO..=NUM_NINE).contains(&character) {
+                        code_point += multiplier * (character as u32 - NUM_ZERO as u32);
+                    } else if (NUM_HEX_A_CAPITAL..=NUM_HEX_F_CAPITAL).contains(&character) {
+                        code_point += multiplier * (character as u32 + 10 - NUM_HEX_A_CAPITAL as u32);
+                    } else if (NUM_HEX_A_SMALL..=NUM_HEX_F_SMALL).contains(&character) {
+                        code_point += multiplier * (character as u32 + 10 - NUM_HEX_A_SMALL as u32);
                     }
                 }
                 None => return Err(UnexpectedEndOfData)

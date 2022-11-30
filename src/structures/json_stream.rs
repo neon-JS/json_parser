@@ -1,8 +1,7 @@
 use std::fmt;
+use crate::constants::token::{TABULATION, WHITESPACE};
 use crate::errors::json_stream_error::JsonStreamError;
 use crate::errors::json_stream_error::JsonStreamError::OutOfRange;
-
-const WHITESPACE: char = ' ';
 
 pub struct JsonStream<'a> {
     stream: &'a [u8],
@@ -54,6 +53,11 @@ impl JsonStream<'_> {
             }
 
             if self.stream[self.pointer] as char == WHITESPACE {
+                self.pointer += 1;
+                continue;
+            }
+
+            if self.stream[self.pointer] as char == TABULATION {
                 self.pointer += 1;
                 continue;
             }
